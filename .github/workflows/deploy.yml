@@ -1,60 +1,112 @@
-name: Deploy Next.js site to Pages
+"use client";
 
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
+import type { ComponentProps } from "react";
+import { AlertDialog as Dialog } from "radix-ui";
+import { twMerge } from "tailwind-merge";
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+export const AlertDialog = Dialog.Root;
+export const AlertDialogTrigger = Dialog.Trigger;
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+export function AlertDialogContent({
+  className,
+  ...props
+}: ComponentProps<typeof Dialog.Content>) {
+  return (
+    <Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+      <Dialog.Content
+        className={twMerge(
+          "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-border bg-background p-6 text-foreground shadow-lg",
+          className
+        )}
+        {...props}
+      />
+    </Dialog.Portal>
+  );
+}
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+export function AlertDialogHeader({
+  className,
+  ...props
+}: ComponentProps<"div">) {
+  return (
+    <div
+      className={twMerge("flex flex-col gap-2 text-left", className)}
+      {...props}
+    />
+  );
+}
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
+export function AlertDialogFooter({
+  className,
+  ...props
+}: ComponentProps<"div">) {
+  return (
+    <div
+      className={twMerge(
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+export function AlertDialogTitle({
+  className,
+  ...props
+}: ComponentProps<typeof Dialog.Title>) {
+  return (
+    <Dialog.Title
+      className={twMerge("text-lg font-semibold", className)}
+      {...props}
+    />
+  );
+}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+export function AlertDialogDescription({
+  className,
+  ...props
+}: ComponentProps<typeof Dialog.Description>) {
+  return (
+    <Dialog.Description
+      className={twMerge("text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  );
+}
 
-      - name: Build
-        run: pnpm run build
-        env:
-          GITHUB_ACTIONS: "true"
+const buttonStyle =
+  "inline-flex min-h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
 
-      - name: Add .nojekyll
-        run: touch ./out/.nojekyll
+export function AlertDialogAction({
+  className,
+  ...props
+}: ComponentProps<typeof Dialog.Action>) {
+  return (
+    <Dialog.Action
+      className={twMerge(
+        buttonStyle,
+        "bg-primary text-primary-foreground hover:bg-primary/90",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+export function AlertDialogCancel({
+  className,
+  ...props
+}: ComponentProps<typeof Dialog.Cancel>) {
+  return (
+    <Dialog.Cancel
+      className={twMerge(
+        buttonStyle,
+        "border border-input bg-background hover:bg-accent",
+        className
+      )}
+      {...props}
+    />
+  );
+}
